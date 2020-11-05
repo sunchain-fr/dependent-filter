@@ -35,13 +35,15 @@
         data: () => ({
             options: [],
             loading: false,
+            resources: [],
         }),
 
         created() {
             this.options = this.filter.options
-
+            this.fetchResources();
             this.$watch(() => {
                 this.loading = true;
+
                 this.fetchOptions(this.filter.dependentOf.reduce((r, filter) => {
                     r[filter] = this.$store.getters[`${this.resourceName}/getFilter`](filter).currentValue;
                     return r;
@@ -62,10 +64,26 @@
             optionValue(option) {
                 return option.label || option.name || option.value
             },
-
+            async fetchResources(filters) {
+                let url = `/nova-vendor/nova-dashboard/${this.resourceName}/resources`
+                const {data: resources} = await Nova.request().get(url, {
+                    params: {
+                        filters: btoa(JSON.stringify(filters)),
+                        filter: this.filterKey,
+                    },
+                })
+                this.resources = resources
+            },
             async fetchOptions(filters) {
+                let url = `/nova-api/${this.resourceName}${lens}/filters/options`
                 const lens = this.lens ? `/lens/${this.lens}` : ''
-                const {data: options} = await Nova.request().get(`/nova-api/${this.resourceName}${lens}/filters/options`, {
+                if (this.resourceName === undefined){
+                    url = `/nova-api/newURL/filters/options`
+                }
+                console.log("hola")
+                console.log(this.resourceName)
+                console.log(this.resources)
+                const {data: options} = await Nova.request().get(url, {
                     params: {
                         filters: btoa(JSON.stringify(filters)),
                         filter: this.filterKey,
