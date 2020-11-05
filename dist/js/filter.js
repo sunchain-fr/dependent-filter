@@ -290,7 +290,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
         return {
             options: [],
             loading: false,
-            resources: []
+            resourceName: ''
         };
     },
 
@@ -298,7 +298,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
         var _this = this;
 
         this.options = this.filter.options;
-        this.fetchResources();
         this.$watch(function () {
             _this.loading = true;
 
@@ -322,30 +321,52 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
         optionValue: function optionValue(option) {
             return option.label || option.name || option.value;
         },
-        fetchResources: function () {
+        fetchOptions: function () {
             var _ref = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee(filters) {
-                var url, _ref2, resources;
+                var lens, url, _ref2, options;
 
                 return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee$(_context) {
                     while (1) {
                         switch (_context.prev = _context.next) {
                             case 0:
-                                url = '/nova-vendor/nova-dashboard/' + this.resourceName + '/resources';
-                                _context.next = 3;
+                                lens = this.lens ? '/lens/' + this.lens : '';
+
+                                this.$data.resourceName = this.resourceName;
+                                url = '/nova-api/' + this.resourceName + lens + '/filters/options';
+
+                                console.log(url);
+                                _context.next = 6;
                                 return Nova.request().get(url, {
                                     params: {
                                         filters: btoa(JSON.stringify(filters)),
                                         filter: this.filterKey
                                     }
+                                }).then(function (options) {
+                                    this.options = options;
+                                    console.log("accept");
+                                    console.log(options);
+                                }, function () {
+                                    console.log("reject");
+                                    // TODO I have no more this so no resourceName, and besides, I don't have the view name...
+                                    // const url = `/nova-vendor/nova-dashboard/${this.resourceName}/views/admin-view/filters`
+                                    // const {data: options} = await Nova.request().get(url, {
+                                    //     params: {
+                                    //         filters: btoa(JSON.stringify(filters)),
+                                    //         filter: this.filterKey,
+                                    //     },
+                                    // })
+                                    // this.options = options
                                 });
 
-                            case 3:
-                                _ref2 = _context.sent;
-                                resources = _ref2.data;
-
-                                this.resources = resources;
-
                             case 6:
+                                _ref2 = _context.sent;
+                                options = _ref2.data;
+
+
+                                this.options = options;
+                                this.loading = false;
+
+                            case 10:
                             case 'end':
                                 return _context.stop();
                         }
@@ -353,55 +374,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 }, _callee, this);
             }));
 
-            function fetchResources(_x) {
+            function fetchOptions(_x) {
                 return _ref.apply(this, arguments);
-            }
-
-            return fetchResources;
-        }(),
-        fetchOptions: function () {
-            var _ref3 = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee2(filters) {
-                var url, lens, _ref4, options;
-
-                return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee2$(_context2) {
-                    while (1) {
-                        switch (_context2.prev = _context2.next) {
-                            case 0:
-                                url = '/nova-api/' + this.resourceName + lens + '/filters/options';
-                                lens = this.lens ? '/lens/' + this.lens : '';
-
-                                if (this.resourceName === undefined) {
-                                    url = '/nova-api/newURL/filters/options';
-                                }
-                                console.log("hola");
-                                console.log(this.resourceName);
-                                console.log(this.resources);
-                                _context2.next = 8;
-                                return Nova.request().get(url, {
-                                    params: {
-                                        filters: btoa(JSON.stringify(filters)),
-                                        filter: this.filterKey
-                                    }
-                                });
-
-                            case 8:
-                                _ref4 = _context2.sent;
-                                options = _ref4.data;
-
-
-                                this.options = options;
-                                this.loading = false;
-
-                            case 12:
-                            case 'end':
-                                return _context2.stop();
-                        }
-                    }
-                }, _callee2, this);
-            }));
-
-            function fetchOptions(_x2) {
-                return _ref3.apply(this, arguments);
             }
 
             return fetchOptions;
